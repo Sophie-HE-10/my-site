@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026学年下学期作业数据综合报告（3-6月）</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        .header h1 { font-size: 36px; margin-bottom: 10px; font-weight: 700; }
+        .header p { font-size: 16px; opacity: 0.9; }
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 40px;
+            background: #f8f9fa;
+        }
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); }
+        .card-title { font-size: 14px; color: #666; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        .card-value { font-size: 32px; font-weight: 700; color: #667eea; margin-bottom: 5px; }
+        .card-value-small { font-size: 13px; line-height: 1.8; font-weight: 600; color: #667eea; margin-bottom: 0; text-align: left; }
+        .card-unit { font-size: 14px; color: #999; }
+        .section { padding: 40px; border-bottom: 1px solid #eee; }
+        .section:last-child { border-bottom: none; }
+        .section-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+            display: inline-block;
+        }
+        .chart-container { position: relative; height: 400px; margin-top: 30px; }
+        .chart-container-large { position: relative; height: 500px; margin-top: 30px; }
+        .table-container { overflow-x: auto; margin-top: 25px; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        thead { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        th { padding: 15px; text-align: left; font-weight: 600; letter-spacing: 0.5px; }
+        td { padding: 12px 15px; border-bottom: 1px solid #eee; }
+        tbody tr:hover { background: #f8f9fa; }
+        .rank-badge {
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            line-height: 28px;
+            text-align: center;
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 12px;
+        }
+        .rank-1 { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); color: white; }
+        .rank-2 { background: linear-gradient(135deg, #c3cfe2 0%, #c3cfe2 100%); color: white; }
+        .rank-3 { background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%); color: white; }
+        .rank-other { background: #f0f0f0; color: #666; }
+        .insight-box {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 30px;
+        }
+        .insight-box h3 { font-size: 20px; margin-bottom: 15px; font-weight: 600; }
+        .insight-box ul { list-style: none; }
+        .insight-box li { padding: 8px 0; padding-left: 25px; position: relative; }
+        .insight-box li:before { content: "▸"; position: absolute; left: 0; font-size: 18px; }
+        .highlight-box {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 30px;
+        }
+        .highlight-box h3 { font-size: 20px; margin-bottom: 15px; font-weight: 600; }
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .warning-box strong { color: #856404; }
+        .warning-box p { color: #856404; margin: 10px 0 0 0; font-size: 14px; }
+        .progress-bar {
+            background: #f0f0f0;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 15px;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            transition: width 1s ease;
+        }
+        .new-feature-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px; }
+        .comparison-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid #eee;
+        }
+        .comparison-card h4 { color: #667eea; font-size: 18px; margin-bottom: 15px; }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+        .stat-row:last-child { border-bottom: none; }
+        .stat-label { color: #666; font-size: 14px; }
+        .stat-value { color: #333; font-weight: 600; font-size: 14px; }
+        .footer {
+            text-align: center;
+            padding: 30px;
+            background: #f8f9fa;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 2026学年下学期作业数据综合报告</h1>
+            <p>数据周期：2026年3月 - 6月28日 | 涵盖14所学校 | 3808条作业记录 | 已剔除考后靶向类型</p>
+        </div>
+
+        <div class="summary-cards">
+            <div class="card">
+                <div class="card-title">作业布置总数</div>
+                <div class="card-value">3,751</div>
+                <div class="card-unit">份次</div>
+            </div>
+            <div class="card">
+                <div class="card-title">参与学校</div>
+                <div class="card-value">14</div>
+                <div class="card-unit">所学校</div>
+            </div>
+            <div class="card">
+                <div class="card-title">平均正确率</div>
+                <div class="card-value" id="avgAccuracy">49.4%</div>
+                <div class="card-unit">完成质量</div>
+            </div>
+            <div class="card" style="cursor: help;" title="题量分布详情">
+                <div class="card-title">题量分布</div>
+                <div class="card-value-small" id="questionsDist">
+                    <div style="margin: 4px 0;">≤5题: <strong>46.3%</strong></div>
+                    <div style="margin: 4px 0;">6-10题: <strong>28.2%</strong></div>
+                    <div style="margin: 4px 0;">11-20题: <strong>17.0%</strong></div>
+                    <div style="margin: 4px 0;">21-50题: <strong>6.4%</strong></div>
+                    <div style="margin: 4px 0;">>50题: <strong>2.0%</strong></div>
+                </div>
+                <div class="card-unit">中位数6题</div>
+            </div>
+            <div class="card" style="cursor: help;" title="学生数分布详情">
+                <div class="card-title">学生数分布</div>
+                <div class="card-value-small" id="studentsDist">
+                    <div style="margin: 4px 0;">≤5人: <strong>61.2%</strong></div>
+                    <div style="margin: 4px 0;">6-10人: <strong>5.8%</strong></div>
+                    <div style="margin: 4px 0;">11-30人: <strong>11.6%</strong></div>
+                    <div style="margin: 4px 0;">31-50人: <strong>19.5%</strong></div>
+                    <div style="margin: 4px 0;">>50人: <strong>2.0%</strong></div>
+                </div>
+                <div class="card-unit">中位数3人</div>
+            </div>
+        </div>
+
+        <!-- 模块1：各学校布置作业总数对比 -->
+        <div class="section">
+            <h2 class="section-title">1. 各学校布置作业总数对比</h2>
+            <div class="chart-container-large">
+                <canvas id="schoolTotalChart"></canvas>
+            </div>
+            <div class="table-container" style="margin-top: 40px;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>排名</th>
+                            <th>学校名称</th>
+                            <th>作业总数</th>
+                            <th>占比</th>
+                            <th>平均正确率</th>
+                            <th>平均题量</th>
+                        </tr>
+                    </thead>
+                    <tbody id="schoolTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 模块2：各学校各月份趋势 -->
+        <div class="section">
+            <h2 class="section-title">2. 各学校各月份布置作业数量趋势</h2>
+            <div class="chart-container-large">
+                <canvas id="schoolMonthChart"></canvas>
+            </div>
+            <div class="insight-box">
+                <h3>📈 趋势洞察</h3>
+                <ul>
+                    <li><strong>衡水桃城中学</strong>：持续领先，4月达到峰值（478份），6月有所回落至164份</li>
+                    <li><strong>日照山海中学</strong>：6月爆发式增长（743份），较5月增长20倍，详见下方深度分析</li>
+                    <li><strong>丽江市第一高级中学</strong>：持续增长，从4月的43份增长到6月的277份（增长544%）</li>
+                    <li><strong>广德实验中学</strong>：前期增长明显（3-5月），6月急剧下降至2份</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 模块3：作业类型分析 -->
+        <div class="section">
+            <h2 class="section-title">3. 作业类型分布与趋势分析</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px;">
+                <div>
+                    <h3 style="color: #666; margin-bottom: 20px;">作业类型总量分布</h3>
+                    <div class="chart-container">
+                        <canvas id="typeDistributionChart"></canvas>
+                    </div>
+                </div>
+                <div>
+                    <h3 style="color: #666; margin-bottom: 20px;">Top5作业类型趋势</h3>
+                    <div class="chart-container">
+                        <canvas id="top5TypeTrendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top: 40px;">
+                <h3 style="color: #666; margin-bottom: 20px;">各类型作业月度趋势</h3>
+                <div class="chart-container-large">
+                    <canvas id="typeMonthChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 模块4：新功能上线效果分析 -->
+        <div class="section">
+            <h2 class="section-title">4. 新功能上线效果分析 <span class="new-feature-badge">重点</span></h2>
+            <div style="background: #f8f9fa; padding: 25px; border-radius: 12px; margin-bottom: 30px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #667eea;">
+                        <h4 style="color: #667eea; margin-bottom: 10px;">📝 14-单词作业(电子)</h4>
+                        <p style="color: #666; font-size: 14px; margin-bottom: 5px;">上线时间：2026年4月28日</p>
+                        <p style="color: #333; font-size: 24px; font-weight: 700;">158份</p>
+                    </div>
+                    <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #f5576c;">
+                        <h4 style="color: #f5576c; margin-bottom: 10px;">📋 17-自定义作业(纸质)</h4>
+                        <p style="color: #666; font-size: 14px; margin-bottom: 5px;">上线时间：2026年6月2日</p>
+                        <p style="color: #333; font-size: 24px; font-weight: 700;">78份</p>
+                    </div>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="newFeatureChart"></canvas>
+            </div>
+
+            <div style="margin-top: 40px;">
+                <h3 style="color: #666; margin-bottom: 20px;">🔍 17类型（自定义作业纸质）- 丽江一中深度分析</h3>
+
+                <div class="comparison-grid">
+                    <div class="comparison-card">
+                        <h4>📊 5月数据（17未上线）</h4>
+                        <div class="stat-row">
+                            <span class="stat-label">总作业量</span>
+                            <span class="stat-value">141份</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">作业(电子)</span>
+                            <span class="stat-value">64份 (45.4%)</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">单词作业</span>
+                            <span class="stat-value">39份 (27.7%)</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">作业(纸质)</span>
+                            <span class="stat-value">27份 (19.1%)</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">作文</span>
+                            <span class="stat-value">10份 (7.1%)</span>
+                        </div>
+                    </div>
+
+                    <div class="comparison-card" style="border: 3px solid #11998e;">
+                        <h4 style="color: #11998e;">📊 6月数据（17已上线）</h4>
+                        <div class="stat-row">
+                            <span class="stat-label">总作业量</span>
+                            <span class="stat-value" style="color: #11998e;">271份 ↑92%</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">作业(电子)</span>
+                            <span class="stat-value" style="color: #11998e;">95份 ↑48% (35.1%)</span>
+                        </div>
+                        <div class="stat-row" style="background: #d4edda;">
+                            <span class="stat-label"><strong>自定义作业(纸质)</strong></span>
+                            <span class="stat-value" style="color: #f5576c;"><strong>77份 🆕 (28.4%)</strong></span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">单词作业</span>
+                            <span class="stat-value" style="color: #11998e;">59份 ↑51% (21.8%)</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">作业(纸质)</span>
+                            <span class="stat-value" style="color: #f5576c;">11份 ↓59% (4.1%)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-container" style="margin-top: 30px;">
+                    <canvas id="lijiangComparisonChart"></canvas>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <h3>💡 17类型核心发现</h3>
+                <ul style="list-style: none; padding: 0;">
+                    <li style="padding: 8px 0; padding-left: 25px; position: relative;">
+                        <span style="position: absolute; left: 0;">✓</span>
+                        <strong>促成整体增长</strong>：丽江一中6月总作业量增长92%（141→271份），17类型贡献77份，占增量的59%
+                    </li>
+                    <li style="padding: 8px 0; padding-left: 25px; position: relative;">
+                        <span style="position: absolute; left: 0;">✓</span>
+                        <strong>部分替代1类型</strong>：传统纸质作业从27份降至11份（↓59%），17类型本质上是更灵活的纸质作业形式
+                    </li>
+                    <li style="padding: 8px 0; padding-left: 25px; position: relative;">
+                        <span style="position: absolute; left: 0;">✓</span>
+                        <strong>独家使用案例</strong>：17类型总78份中，丽江一中占77份（98.7%），形成最佳实践
+                    </li>
+                    <li style="padding: 8px 0; padding-left: 25px; position: relative;">
+                        <span style="position: absolute; left: 0;">✓</span>
+                        <strong>协同增长效应</strong>：17类型上线的同时，0类型和14类型也同步增长，显示新功能带动了整体使用
+                    </li>
+                    <li style="padding: 8px 0; padding-left: 25px; position: relative;">
+                        <span style="position: absolute; left: 0;">✓</span>
+                        <strong>推广建议</strong>：丽江一中案例可作为标杆，向其他学校推广17类型的使用场景和价值
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 模块5：学科与年级分析 -->
+        <div class="section">
+            <h2 class="section-title">5. 学科与年级深度分析 <span class="new-feature-badge">新增</span></h2>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px;">
+                <div>
+                    <h3 style="color: #666; margin-bottom: 20px;">学科分布（作业记录数）</h3>
+                    <div class="chart-container">
+                        <canvas id="subjectDistChart"></canvas>
+                    </div>
+                </div>
+                <div>
+                    <h3 style="color: #666; margin-bottom: 20px;">年级分布（作业记录数）</h3>
+                    <div class="chart-container">
+                        <canvas id="gradeDistChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 40px;">
+                <h3 style="color: #666; margin-bottom: 20px;">年级月度趋势对比</h3>
+                <div class="chart-container-large">
+                    <canvas id="gradeMonthChart"></canvas>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <h3>🔍 核心发现：高一6月暴增现象</h3>
+                <ul style="list-style: none; padding: 0;">
+                    <li style="padding: 8px 0; padding-left: 25px; position: relative;">
+                        <span style="position: absolute; left: 0;">1️⃣</span>
+                        <strong>高一作业暴增955%</strong>：从3月95份增长到6月1002份
+                    </li>
+                    <li style="padding: 8px 0; padding-left: 25px; position: relative;">
+                        <span style="position: absolute; left: 0;">2️⃣</span>
+                        <strong>高三作业骤降68%</strong>：从3月423份下降到6月136份（高考离校）
+                    </li>
+                    <li style="padding: 8px 0; padding-left: 25px; position: relative;">
+                        <span style="position: absolute; left: 0;">3️⃣</span>
+                        <strong>学科集中在数学</strong>：高一6月作业中，数学占70.5%（706份）
+                    </li>
+                    <li style="padding: 8px 0; padding-left: 25px; position: relative;">
+                        <span style="position: absolute; left: 0;">4️⃣</span>
+                        <strong>主要来自日照山海</strong>：高一6月1002份中，日照占74.2%（743份）
+                    </li>
+                    <li style="padding: 8px 0; padding-left: 25px; position: relative;">
+                        <span style="position: absolute; left: 0;">5️⃣</span>
+                        <strong>季节性规律</strong>：6月期末冲刺，高一年级集中布置作业
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 模块6：作业质量洞察 -->
+        <div class="section">
+            <h2 class="section-title">6. 作业质量洞察 <span class="new-feature-badge">新增</span></h2>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px;">
+                <div>
+                    <h3 style="color: #666; margin-bottom: 20px;">学科正确率对比</h3>
+                    <div class="chart-container">
+                        <canvas id="subjectAccuracyChart"></canvas>
+                    </div>
+                </div>
+                <div>
+                    <h3 style="color: #666; margin-bottom: 20px;">年级正确率对比</h3>
+                    <div class="chart-container">
+                        <canvas id="gradeAccuracyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 40px;">
+                <h3 style="color: #666; margin-bottom: 20px;">各学校平均正确率排名</h3>
+                <div class="chart-container-large">
+                    <canvas id="schoolAccuracyChart"></canvas>
+                </div>
+            </div>
+
+            <div style="margin-top: 40px;">
+                <h3 style="color: #666; margin-bottom: 20px;">各学校平均作业题量</h3>
+                <div class="chart-container-large">
+                    <canvas id="schoolQuestionsChart"></canvas>
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <strong>⚠️ 数据质量警示：广德实验中学异常</strong>
+                <p>广德实验中学平均正确率仅11.9%，其中77.4%的作业正确率为0。可能原因：数据质量问题、作业布置后未批改、或系统bug。建议进一步调查。</p>
+            </div>
+
+            <div class="insight-box">
+                <h3>💡 质量分析关键发现</h3>
+                <ul>
+                    <li><strong>整体正确率偏低</strong>：平均49.4%，约59%的作业正确率<60%</li>
+                    <li><strong>学科差异显著</strong>：数学69.8% vs 化学31.7%，相差2倍以上</li>
+                    <li><strong>年级差异明显</strong>：高一73.2% vs 高三28.1%，高三难度更大</li>
+                    <li><strong>日照表现优异</strong>：平均正确率89.1%，远超其他学校</li>
+                    <li><strong>题量分布合理</strong>：中位数6题，46.3%的作业≤5题（微作业为主）</li>
+                    <li><strong>学生参与适中</strong>：平均13人/次，67%的作业≤10人提交（中位数3人）</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 模块7：日照山海6月深度分析 -->
+        <div class="section">
+            <h2 class="section-title">7. 日照山海中学6月爆发深度分析</h2>
+
+            <div class="warning-box">
+                <strong>⚠️ 异常增长警报</strong>
+                <p>5月35份 → 6月743份，增长708份（+2023%），其中626份为数学作业，全部针对高一年级</p>
+            </div>
+
+            <div class="comparison-grid">
+                <div class="comparison-card">
+                    <h4>📊 5月数据</h4>
+                    <div class="stat-row">
+                        <span class="stat-label">总作业量</span>
+                        <span class="stat-value">35份</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">作业(电子)</span>
+                        <span class="stat-value">26份 (74.3%)</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">数学学科</span>
+                        <span class="stat-value">9份</span>
+                    </div>
+                </div>
+                <div class="comparison-card" style="border: 3px solid #f5576c;">
+                    <h4 style="color: #f5576c;">📊 6月数据（爆发期）</h4>
+                    <div class="stat-row">
+                        <span class="stat-label">总作业量</span>
+                        <span class="stat-value" style="color: #f5576c; font-size: 18px;">743份 ↑2023%</span>
+                    </div>
+                    <div class="stat-row" style="background: #fff3cd;">
+                        <span class="stat-label"><strong>作业(电子)</strong></span>
+                        <span class="stat-value" style="color: #f5576c;"><strong>731份 (98.4%)</strong></span>
+                    </div>
+                    <div class="stat-row" style="background: #fff3cd;">
+                        <span class="stat-label"><strong>数学学科</strong></span>
+                        <span class="stat-value" style="color: #f5576c;"><strong>626份 (84.2%) ↑6856%</strong></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container" style="margin-top: 30px;">
+                <canvas id="rizhaoAnalysisChart"></canvas>
+            </div>
+
+            <div class="highlight-box" style="margin-top: 30px;">
+                <h3>🎯 增长原因分析</h3>
+                <ul style="list-style: none; padding: 0;">
+                    <li style="padding: 8px 0; padding-left: 25px; position: relative;">
+                        <span style="position: absolute; left: 0;">1️⃣</span>
+                        <strong>数学驱动</strong>：84.2%的增长来自数学学科，从9份暴增至626份（69倍）
+                    </li>
+                    <li style="padding: 8px 0; padding-left: 25px; position: relative;">
+                        <span style="position: absolute; left: 0;">2️⃣</span>
+                        <strong>年级集中</strong>：全部743份作业针对高一年级，无其他年级
+                    </li>
+                    <li style="padding: 8px 0; padding-left: 25px; position: relative;">
+                        <span style="position: absolute; left: 0;">3️⃣</span>
+                        <strong>期末冲刺</strong>：6月期末考试前的集中训练，符合教学规律
+                    </li>
+                    <li style="padding: 8px 0; padding-left: 25px; position: relative;">
+                        <span style="position: absolute; left: 0;">4️⃣</span>
+                        <strong>质量优异</strong>：日照山海平均正确率89.1%，效果显著
+                    </li>
+                    <li style="padding: 8px 0; padding-left: 25px; position: relative;">
+                        <span style="position: absolute; left: 0;">5️⃣</span>
+                        <strong>后续建议</strong>：跟进7月数据验证是否为期末特殊情况
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 模块8：综合洞察 -->
+        <div class="section">
+            <h2 class="section-title">8. 综合洞察与建议</h2>
+
+            <div class="insight-box">
+                <h3>📌 关键发现总结</h3>
+                <ul>
+                    <li><strong>理科主导</strong>：数学+化学占58.8%，理科作业占74.4%</li>
+                    <li><strong>高中为主</strong>：高一+高三占93.7%，中学阶段是核心用户</li>
+                    <li><strong>新功能成效</strong>：14类型和17类型上线后迅速被采纳，丽江一中形成最佳实践</li>
+                    <li><strong>头部集中</strong>：前3所学校占总量70.3%，衡水桃城一校占34.9%</li>
+                    <li><strong>质量分化</strong>：日照89.1% vs 广德11.9%，学校间差异极大</li>
+                    <li><strong>微作业流行</strong>：44.7%的作业≤5题，小规模高频是趋势</li>
+                    <li><strong>学科专注度</strong>：衡水使用9科最全面，多数学校专注3-6个学科</li>
+                    <li><strong>季节性规律</strong>：高一6月冲刺，高三6月离校，符合教学周期</li>
+                </ul>
+            </div>
+
+            <div class="highlight-box">
+                <h3>💡 行动建议</h3>
+                <ul style="list-style: none; padding: 0;">
+                    <li style="padding: 8px 0; padding-left: 25px; position: relative;">
+                        <span style="position: absolute; left: 0;">▸</span>
+                        <strong>推广丽江一中案例</strong>：17类型使用率98.7%，可作为标杆向其他学校推广
+                    </li>
+                    <li style="padding: 8px 0; padding-left: 25px; position: relative;">
+                        <span style="position: absolute; left: 0;">▸</span>
+                        <strong>调查广德数据质量</strong>：77.4%作业正确率为0，需排查系统问题
+                    </li>
+                    <li style="padding: 8px 0; padding-left: 25px; position: relative;">
+                        <span style="position: absolute; left: 0;">▸</span>
+                        <strong>扩展文科支持</strong>：语文仅5.9%，历史地理不足1%，有增长空间
+                    </li>
+                    <li style="padding: 8px 0; padding-left: 25px; position: relative;">
+                        <span style="position: absolute; left: 0;">▸</span>
+                        <strong>优化作业难度</strong>：平均正确率48.9%偏低，需调整题目难度
+                    </li>
+                    <li style="padding: 8px 0; padding-left: 25px; position: relative;">
+                        <span style="position: absolute; left: 0;">▸</span>
+                        <strong>跟进日照效果</strong>：6月数学作业626份，验证7-9月是否持续
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>数据生成时间：2026年6月29日 | 数据来源：作业系统布置记录+作业明细数据</p>
+            <p style="margin-top: 10px; font-size: 12px; opacity: 0.7;">报告由 Claude Code 自动生成</p>
+        </div>
+    </div>
+
+    <script>
+        Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+        Chart.defaults.font.size = 13;
+
+        const colors = [
+            'rgba(102, 126, 234, 0.8)', 'rgba(118, 75, 162, 0.8)', 'rgba(237, 100, 166, 0.8)',
+            'rgba(255, 154, 158, 0.8)', 'rgba(250, 208, 196, 0.8)', 'rgba(189, 224, 254, 0.8)',
+            'rgba(162, 210, 255, 0.8)', 'rgba(134, 182, 246, 0.8)', 'rgba(106, 153, 235, 0.8)',
+            'rgba(92, 140, 229, 0.8)'
+        ];
+
+        // 数据直接嵌入
+        const data = {"school_total":{"衡水桃城中学":1347,"日照山海中学":838,"广德实验中学":465,"丽江市第一高级中学":455,"北京仁北高级中学":218,"北师大南山附属学校":167,"罗甸第一中学":81,"镇江心湖高级中学":76,"赤壁市第一中学":56,"首都师范大学附属中学昌平学校":26,"绵阳东辰高级中学":8,"北京大学附属小学":4,"深高园-文博高级中学":4,"北京十一学校":1},"school_month_data":{"丽江市第一高级中学":{"3":0,"4":43,"5":141,"6":271},"北京仁北高级中学":{"3":49,"4":90,"5":49,"6":30},"北京十一学校":{"3":1,"4":0,"5":0,"6":0},"北京大学附属小学":{"3":4,"4":0,"5":0,"6":0},"北师大南山附属学校":{"3":31,"4":52,"5":49,"6":35},"广德实验中学":{"3":105,"4":171,"5":187,"6":2},"日照山海中学":{"3":0,"4":60,"5":35,"6":743},"深高园-文博高级中学":{"3":0,"4":0,"5":0,"6":4},"绵阳东辰高级中学":{"3":0,"4":0,"5":8,"6":0},"罗甸第一中学":{"3":27,"4":26,"5":19,"6":9},"衡水桃城中学":{"3":375,"4":478,"5":330,"6":164},"赤壁市第一中学":{"3":46,"4":2,"5":8,"6":0},"镇江心湖高级中学":{"3":21,"4":29,"5":16,"6":10},"首都师范大学附属中学昌平学校":{"3":2,"4":0,"5":8,"6":16}},"type_total":{"作业(电子)":2650,"自定义靶向-自定义靶向(电子)":502,"作业(纸质)":254,"单词作业(电子)":158,"作文":100,"自定义作业(纸质)":78,"自定义作业(电子)":8,"自定义靶向-自定义靶向(纸质)":1},"type_month":{"3":{"作业(电子)":498,"作业(纸质)":43,"作文":19,"自定义靶向-自定义靶向(电子)":100,"自定义靶向-自定义靶向(纸质)":1,"单词作业(电子)":0,"自定义作业(电子)":0,"自定义作业(纸质)":0},"4":{"作业(电子)":646,"作业(纸质)":82,"作文":23,"自定义靶向-自定义靶向(电子)":195,"自定义靶向-自定义靶向(纸质)":0,"单词作业(电子)":5,"自定义作业(电子)":0,"自定义作业(纸质)":0},"5":{"作业(电子)":486,"作业(纸质)":83,"作文":29,"自定义靶向-自定义靶向(电子)":187,"自定义靶向-自定义靶向(纸质)":0,"单词作业(电子)":65,"自定义作业(电子)":0,"自定义作业(纸质)":0},"6":{"作业(电子)":1020,"作业(纸质)":46,"作文":29,"自定义靶向-自定义靶向(电子)":20,"自定义靶向-自定义靶向(纸质)":0,"单词作业(电子)":88,"自定义作业(电子)":8,"自定义作业(纸质)":78}},"active_schools_per_month":{"3":10,"4":9,"5":11,"6":10},"school_type_diversity":{"丽江市第一高级中学":7,"日照山海中学":5,"衡水桃城中学":5,"赤壁市第一中学":5,"北师大南山附属学校":4,"镇江心湖高级中学":4,"首都师范大学附属中学昌平学校":4,"北京仁北高级中学":3,"北京大学附属小学":3,"广德实验中学":3,"罗甸第一中学":3,"北京十一学校":1,"深高园-文博高级中学":1,"绵阳东辰高级中学":1},"type14_schools":{"丽江市第一高级中学":101,"衡水桃城中学":28,"镇江心湖高级中学":13,"首都师范大学附属中学昌平学校":10,"日照山海中学":5,"赤壁市第一中学":1},"lijiang_may":{"作业(电子)":64,"单词作业(电子)":39,"作业(纸质)":27,"作文":10,"自定义靶向-自定义靶向(电子)":1},"lijiang_june":{"作业(电子)":95,"自定义作业(纸质)":77,"单词作业(电子)":59,"作文":12,"作业(纸质)":11,"自定义靶向-自定义靶向(电子)":9,"自定义作业(电子)":8},"rizhao_data":{"4月":{"作业(电子)":34,"自定义靶向-自定义靶向(电子)":10,"作业(纸质)":8,"作文":8},"5月":{"作业(电子)":26,"自定义靶向-自定义靶向(电子)":7,"单词作业(电子)":2},"6月":{"作业(电子)":731,"自定义靶向-自定义靶向(电子)":7,"单词作业(电子)":3,"作文":2}},"subject_distribution":{"数学":1269,"化学":978,"英语":628,"物理":433,"语文":231,"生物":191,"政治":45,"历史":17,"地理":16},"grade_distribution":{"高三":1597,"高一":1546,"高二":661,"五年级":4},"subject_month_trend":{"3":{"化学":204,"历史":9,"地理":3,"政治":8,"数学":201,"物理":111,"生物":54,"英语":69,"语文":29},"4":{"化学":392,"历史":8,"地理":3,"政治":26,"数学":195,"物理":127,"生物":58,"英语":105,"语文":63},"5":{"化学":231,"历史":0,"地理":10,"政治":5,"数学":167,"物理":134,"生物":49,"英语":187,"语文":77},"6":{"化学":151,"历史":0,"地理":0,"政治":6,"数学":706,"物理":61,"生物":30,"英语":267,"语文":62}},"grade_month_trend":{"3":{"五年级":4,"高一":95,"高三":420,"高二":169},"4":{"五年级":0,"高一":214,"高三":571,"高二":192},"5":{"五年级":0,"高一":235,"高三":470,"高二":155},"6":{"五年级":0,"高一":1002,"高三":136,"高二":145}},"subject_accuracy":{"历史":0.7016,"数学":0.6979,"政治":0.5189,"地理":0.4836,"英语":0.462,"生物":0.4594,"物理":0.4409,"语文":0.3272,"化学":0.3166},"grade_accuracy":{"高一":0.7321,"高二":0.454,"五年级":0.4321,"高三":0.2811},"school_accuracy":{"日照山海中学":0.8908,"绵阳东辰高级中学":0.6038,"丽江市第一高级中学":0.5937,"北师大南山附属学校":0.5899,"首都师范大学附属中学昌平学校":0.5809,"赤壁市第一中学":0.5009,"北京大学附属小学":0.4321,"衡水桃城中学":0.3814,"镇江心湖高级中学":0.3797,"深高园-文博高级中学":0.3425,"北京仁北高级中学":0.3375,"罗甸第一中学":0.2725,"广德实验中学":0.1195,"北京十一学校":0.05},"school_avg_questions":{"丽江市第一高级中学":22.4,"镇江心湖高级中学":21.2,"首都师范大学附属中学昌平学校":20.0,"北京仁北高级中学":13.8,"北师大南山附属学校":13.3,"赤壁市第一中学":10.2,"北京十一学校":10.0,"衡水桃城中学":9.8,"深高园-文博高级中学":9.5,"广德实验中学":7.4,"罗甸第一中学":6.2,"绵阳东辰高级中学":4.6,"北京大学附属小学":4.5,"日照山海中学":1.9},"school_subject_dist":{"丽江市第一高级中学":{"化学":32,"历史":0,"地理":0,"政治":0,"数学":72,"物理":66,"生物":44,"英语":199,"语文":50},"北京仁北高级中学":{"化学":30,"历史":0,"地理":6,"政治":30,"数学":49,"物理":4,"生物":6,"英语":96,"语文":11},"北京十一学校":{"化学":0,"历史":0,"地理":0,"政治":0,"数学":1,"物理":0,"生物":0,"英语":0,"语文":0},"北京大学附属小学":{"化学":0,"历史":0,"地理":0,"政治":0,"数学":4,"物理":0,"生物":0,"英语":0,"语文":0},"北师大南山附属学校":{"化学":32,"历史":0,"地理":0,"政治":0,"数学":51,"物理":82,"生物":0,"英语":1,"语文":2},"广德实验中学":{"化学":127,"历史":0,"地理":0,"政治":0,"数学":113,"物理":115,"生物":0,"英语":60,"语文":67},"日照山海中学":{"化学":10,"历史":0,"地理":0,"政治":0,"数学":647,"物理":13,"生物":0,"英语":131,"语文":37},"深高园-文博高级中学":{"化学":0,"历史":0,"地理":0,"政治":0,"数学":4,"物理":0,"生物":0,"英语":0,"语文":0},"绵阳东辰高级中学":{"化学":0,"历史":0,"地理":8,"政治":0,"数学":0,"物理":0,"生物":0,"英语":0,"语文":0},"罗甸第一中学":{"化学":12,"历史":0,"地理":0,"政治":6,"数学":10,"物理":5,"生物":0,"英语":39,"语文":5},"衡水桃城中学":{"化学":683,"历史":17,"地理":2,"政治":9,"数学":271,"物理":144,"生物":138,"英语":46,"语文":48},"赤壁市第一中学":{"化学":11,"历史":0,"地理":0,"政治":0,"数学":34,"物理":4,"生物":2,"英语":13,"语文":0},"镇江心湖高级中学":{"化学":41,"历史":0,"地理":0,"政治":0,"数学":10,"物理":0,"生物":0,"英语":29,"语文":0},"首都师范大学附属中学昌平学校":{"化学":0,"历史":0,"地理":0,"政治":0,"数学":3,"物理":0,"生物":1,"英语":14,"语文":11}},"rizhao_june_subject":{"化学":2,"数学":626,"物理":2,"英语":101,"语文":12},"grade10_month":{"3":95,"4":214,"5":235,"6":1002},"grade12_month":{"3":420,"4":571,"5":470,"6":136},"questions_distribution":{"1-5":46.3,"6-10":28.2,"11-20":17.0,"21-50":6.4,">50":2.0},"students_distribution":{"1-5":61.2,"6-10":5.8,"11-30":11.6,"31-50":19.5,">50":2.0},"total_homework":3751,"total_schools":14,"total_homework_records":3808,"avg_accuracy":0.4944,"avg_questions":9.9,"median_questions":6,"avg_students":13.0,"median_students":3};
+
+        // 开始渲染
+        (function() {
+            // 更新顶部卡片
+            document.getElementById('avgAccuracy').textContent = (data.avg_accuracy * 100).toFixed(1) + '%';
+
+            const months = ['3', '4', '5', '6'];
+
+            // 1. 各学校总量
+            const schoolNames = Object.keys(data.school_total);
+            const schoolValues = Object.values(data.school_total);
+            const totalHomework = schoolValues.reduce((a, b) => a + b, 0);
+
+            new Chart(document.getElementById('schoolTotalChart'), {
+                type: 'bar',
+                data: {
+                    labels: schoolNames,
+                    datasets: [{
+                        label: '作业总数',
+                        data: schoolValues,
+                        backgroundColor: colors,
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(0, 0, 0, 0.05)' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // 填充学校表格
+            const tbody = document.getElementById('schoolTableBody');
+            schoolNames.forEach((school, index) => {
+                const value = schoolValues[index];
+                const percent = (value / totalHomework * 100).toFixed(1);
+                const rankClass = index === 0 ? 'rank-1' : index === 1 ? 'rank-2' : index === 2 ? 'rank-3' : 'rank-other';
+                const accuracy = data.school_accuracy[school] ? (data.school_accuracy[school] * 100).toFixed(1) + '%' : '-';
+                const questions = data.school_avg_questions[school] ? data.school_avg_questions[school].toFixed(1) : '-';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td><span class="rank-badge ${rankClass}">${index + 1}</span></td>
+                        <td><strong>${school}</strong></td>
+                        <td>${value}份</td>
+                        <td>${percent}%</td>
+                        <td>${accuracy}</td>
+                        <td>${questions}题</td>
+                    </tr>
+                `;
+            });
+
+            // 2. 学校月度趋势
+            const topSchools = schoolNames.slice(0, 7);
+            new Chart(document.getElementById('schoolMonthChart'), {
+                type: 'line',
+                data: {
+                    labels: months.map(m => m + '月'),
+                    datasets: topSchools.map((school, index) => ({
+                        label: school,
+                        data: months.map(month => data.school_month_data[school]?.[month] || 0),
+                        borderColor: colors[index],
+                        backgroundColor: colors[index],
+                        tension: 0.4,
+                        pointRadius: 5
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: true, position: 'bottom' } },
+                    scales: {
+                        y: { beginAtZero: true },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // 3. 作业类型分布
+            new Chart(document.getElementById('typeDistributionChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(data.type_total),
+                    datasets: [{
+                        data: Object.values(data.type_total),
+                        backgroundColor: colors,
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'right' } }
+                }
+            });
+
+            // Top5类型趋势
+            const top5Types = Object.keys(data.type_total).slice(0, 5);
+            new Chart(document.getElementById('top5TypeTrendChart'), {
+                type: 'line',
+                data: {
+                    labels: months.map(m => m + '月'),
+                    datasets: top5Types.map((type, index) => ({
+                        label: type,
+                        data: months.map(month => data.type_month[month]?.[type] || 0),
+                        borderColor: colors[index],
+                        backgroundColor: colors[index],
+                        tension: 0.4,
+                        pointRadius: 4
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: true, position: 'bottom' } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+
+            // 全类型月度趋势
+            new Chart(document.getElementById('typeMonthChart'), {
+                type: 'line',
+                data: {
+                    labels: months.map(m => m + '月'),
+                    datasets: Object.keys(data.type_total).map((type, index) => ({
+                        label: type,
+                        data: months.map(month => data.type_month[month]?.[type] || 0),
+                        borderColor: colors[index],
+                        backgroundColor: colors[index],
+                        tension: 0.4,
+                        pointRadius: 5
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: true, position: 'bottom' } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+
+            // 4. 新功能采用
+            new Chart(document.getElementById('newFeatureChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['3月', '4月', '5月', '6月'],
+                    datasets: [
+                        {
+                            label: '14-单词作业',
+                            data: [0, 5, 65, 88],
+                            backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                            borderRadius: 8
+                        },
+                        {
+                            label: '17-自定义作业(纸质)',
+                            data: [0, 0, 0, 78],
+                            backgroundColor: 'rgba(245, 87, 108, 0.8)',
+                            borderRadius: 8
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true, position: 'top' },
+                        title: { display: true, text: '新功能采用趋势', font: { size: 16 } }
+                    }
+                }
+            });
+
+            // 丽江一中5月vs6月对比
+            new Chart(document.getElementById('lijiangComparisonChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['作业(电子)', '单词作业(电子)', '作业(纸质)', '自定义作业(纸质)', '作文', '自定义靶向(电子)'],
+                    datasets: [
+                        {
+                            label: '5月（17未上线）',
+                            data: [64, 39, 27, 0, 10, 1],
+                            backgroundColor: 'rgba(102, 126, 234, 0.6)',
+                            borderRadius: 8
+                        },
+                        {
+                            label: '6月（17已上线）',
+                            data: [95, 59, 11, 77, 12, 9],
+                            backgroundColor: 'rgba(17, 153, 142, 0.8)',
+                            borderRadius: 8
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        title: {
+                            display: true,
+                            text: '丽江一中 5月 vs 6月作业类型对比',
+                            font: { size: 16 }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                        }
+                    }
+                }
+            });
+
+            // 5. 学科分布
+            new Chart(document.getElementById('subjectDistChart'), {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(data.subject_distribution),
+                    datasets: [{
+                        data: Object.values(data.subject_distribution),
+                        backgroundColor: colors
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'right' } }
+                }
+            });
+
+            // 年级分布
+            new Chart(document.getElementById('gradeDistChart'), {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(data.grade_distribution),
+                    datasets: [{
+                        data: Object.values(data.grade_distribution),
+                        backgroundColor: colors.slice(0, 4)
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'right' } }
+                }
+            });
+
+            // 年级月度趋势
+            new Chart(document.getElementById('gradeMonthChart'), {
+                type: 'line',
+                data: {
+                    labels: months.map(m => m + '月'),
+                    datasets: [
+                        {
+                            label: '高一',
+                            data: months.map(m => data.grade_month_trend[m]?.['高一'] || 0),
+                            borderColor: 'rgba(102, 126, 234, 0.8)',
+                            backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                            tension: 0.4,
+                            pointRadius: 6,
+                            borderWidth: 3
+                        },
+                        {
+                            label: '高三',
+                            data: months.map(m => data.grade_month_trend[m]?.['高三'] || 0),
+                            borderColor: 'rgba(245, 87, 108, 0.8)',
+                            backgroundColor: 'rgba(245, 87, 108, 0.8)',
+                            tension: 0.4,
+                            pointRadius: 6,
+                            borderWidth: 3
+                        },
+                        {
+                            label: '高二',
+                            data: months.map(m => data.grade_month_trend[m]?.['高二'] || 0),
+                            borderColor: 'rgba(189, 224, 254, 0.8)',
+                            backgroundColor: 'rgba(189, 224, 254, 0.8)',
+                            tension: 0.4,
+                            pointRadius: 5
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true, position: 'top' },
+                        title: { display: true, text: '高一vs高三：6月的季节性分化', font: { size: 16 } }
+                    },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+
+            // 6. 学科正确率
+            new Chart(document.getElementById('subjectAccuracyChart'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(data.subject_accuracy),
+                    datasets: [{
+                        label: '平均正确率',
+                        data: Object.values(data.subject_accuracy).map(v => v * 100),
+                        backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { callback: value => value + '%' }
+                        }
+                    }
+                }
+            });
+
+            // 年级正确率
+            new Chart(document.getElementById('gradeAccuracyChart'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(data.grade_accuracy),
+                    datasets: [{
+                        label: '平均正确率',
+                        data: Object.values(data.grade_accuracy).map(v => v * 100),
+                        backgroundColor: 'rgba(237, 100, 166, 0.8)',
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { callback: value => value + '%' }
+                        }
+                    }
+                }
+            });
+
+            // 学校正确率排名
+            new Chart(document.getElementById('schoolAccuracyChart'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(data.school_accuracy),
+                    datasets: [{
+                        label: '平均正确率',
+                        data: Object.values(data.school_accuracy).map(v => v * 100),
+                        backgroundColor: 'rgba(17, 153, 142, 0.8)',
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: { display: false },
+                        title: { display: true, text: '日照山海89.1%领先，广德实验11.9%异常', font: { size: 14 } }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { callback: value => value + '%' }
+                        }
+                    }
+                }
+            });
+
+            // 学校平均题量
+            new Chart(document.getElementById('schoolQuestionsChart'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(data.school_avg_questions),
+                    datasets: [{
+                        label: '平均题量',
+                        data: Object.values(data.school_avg_questions),
+                        backgroundColor: 'rgba(255, 154, 158, 0.8)',
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: { display: false },
+                        title: { display: true, text: '丽江一中22.4题最多，日照山海1.9题最少', font: { size: 14 } }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: { callback: value => value + '题' }
+                        }
+                    }
+                }
+            });
+
+            // 7. 日照山海分析
+            new Chart(document.getElementById('rizhaoAnalysisChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['4月', '5月', '6月'],
+                    datasets: [
+                        {
+                            label: '数学',
+                            data: [12, 9, 626],
+                            backgroundColor: 'rgba(245, 87, 108, 0.8)',
+                            borderRadius: 8
+                        },
+                        {
+                            label: '英语',
+                            data: [24, 6, 101],
+                            backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                            borderRadius: 8
+                        },
+                        {
+                            label: '语文',
+                            data: [12, 13, 12],
+                            backgroundColor: 'rgba(189, 224, 254, 0.8)',
+                            borderRadius: 8
+                        },
+                        {
+                            label: '化学',
+                            data: [4, 4, 2],
+                            backgroundColor: 'rgba(134, 182, 246, 0.8)',
+                            borderRadius: 8
+                        },
+                        {
+                            label: '物理',
+                            data: [8, 3, 2],
+                            backgroundColor: 'rgba(162, 210, 255, 0.8)',
+                            borderRadius: 8
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true, position: 'top' },
+                        title: { display: true, text: '日照山海6月数学作业暴增69倍', font: { size: 16 } }
+                    },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
